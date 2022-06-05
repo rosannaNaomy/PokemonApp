@@ -1,10 +1,10 @@
 package com.np.pokemonapp.ui
 
-import androidx.lifecycle.LiveData
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.np.pokemonapp.datasource.network.response.PokemonResponse
+import com.np.pokemonapp.domain.model.PokemonEntry
 import com.np.pokemonapp.repository.PokemonRepository
 import com.np.pokemonapp.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,8 +16,8 @@ class PokemonSharedViewModel @Inject constructor(
     private val repository: PokemonRepository
 ) : ViewModel() {
 
-    private val _pokemonList = MutableLiveData<List<Resource<PokemonResponse>>>()
-    val pokemonList: LiveData<List<Resource<PokemonResponse>>>
+    private var _pokemonList = MutableLiveData<List<PokemonEntry>>()
+    val pokemonList: MutableLiveData<List<PokemonEntry>>
         get() = _pokemonList
 
     var loadError = MutableLiveData("")
@@ -31,9 +31,12 @@ class PokemonSharedViewModel @Inject constructor(
         viewModelScope.launch {
             isLoading.value = true
             val result = repository.getPokemonList()
-            when(result) {
+            when (result) {
                 is Resource.Success -> {
-                    _pokemonList.postValue(listOf(result))
+                    _pokemonList.value = result.data?.results?.map {
+                        PokemonEntry(it.name, it.url, 0 )
+                    }
+
                     loadError.value = ""
                     isLoading.value = false
                 }
