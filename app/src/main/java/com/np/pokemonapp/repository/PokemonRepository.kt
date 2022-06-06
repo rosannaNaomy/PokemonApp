@@ -1,6 +1,7 @@
 package com.np.pokemonapp.repository
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import com.np.pokemonapp.datasource.local.PokemonDao
 import com.np.pokemonapp.datasource.local.entities.PokemonAbility
 import com.np.pokemonapp.datasource.local.entities.PokemonWithAbilities
@@ -50,7 +51,8 @@ class PokemonRepository @Inject constructor(
         return pokemonDao.getPokemonWithAbilities(id)
     }
 
-    suspend fun allPokemonEntriesFromDB(): List<PokemonDomainModel> {
+    fun allPokemonEntriesFromDB(): LiveData<List<PokemonDomainModel>> {
        return DaoModelToDomainModel.fromDatabaseList(pokemonDao.observeAllPokemonEntries())
     }
+
 }

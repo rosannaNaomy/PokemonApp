@@ -16,7 +16,7 @@ interface PokemonDao {
     suspend fun insertPokemonAbility(pokemonAbility: PokemonAbility)
 
     @Query("SELECT * FROM pokemon_entries")
-    suspend fun observeAllPokemonEntries(): List<PokemonEntry>
+    fun observeAllPokemonEntries(): LiveData<List<PokemonEntry>>
 
     @Query("DELETE FROM pokemon_entries")
     suspend fun deleteAll()
