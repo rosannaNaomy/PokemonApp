@@ -1,10 +1,9 @@
 package com.np.pokemonapp.ui
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.np.pokemonapp.domain.model.PokemonEntry
+import com.np.pokemonapp.datasource.local.entities.PokemonEntry
 import com.np.pokemonapp.repository.PokemonRepository
 import com.np.pokemonapp.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel

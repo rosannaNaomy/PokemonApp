@@ -1,6 +1,7 @@
 package com.np.pokemonapp.repository
 
 import android.util.Log
+import com.np.pokemonapp.datasource.local.PokemonDao
 import com.np.pokemonapp.datasource.network.PokeAPI
 import com.np.pokemonapp.datasource.network.response.Pokemon
 import com.np.pokemonapp.datasource.network.response.PokemonResponse
@@ -13,7 +14,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class PokemonRepository @Inject constructor(
-    private val api: PokeAPI
+    private val api: PokeAPI,
+    private val pokemonDao: PokemonDao
 ) {
 
     suspend fun getPokemonList(): Resource<PokemonResponse> {

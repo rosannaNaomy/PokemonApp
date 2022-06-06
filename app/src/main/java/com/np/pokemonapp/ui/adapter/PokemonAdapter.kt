@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.np.pokemonapp.R
-import com.np.pokemonapp.domain.model.PokemonEntry
+import com.np.pokemonapp.datasource.local.entities.PokemonEntry
 import kotlinx.android.synthetic.main.pokemon_item.view.*
 import javax.inject.Inject
 
