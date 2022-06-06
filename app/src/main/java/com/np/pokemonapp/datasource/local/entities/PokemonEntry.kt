@@ -5,8 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "pokemon_entries")
 data class PokemonEntry(
-    @PrimaryKey
+    @PrimaryKey val id: Int,
     val pokemonName: String,
-    val url: String,
-    val id: Int
+    val url: String
 )

@@ -2,15 +2,17 @@ package com.np.pokemonapp.repository
 
 import android.util.Log
 import com.np.pokemonapp.datasource.local.PokemonDao
+import com.np.pokemonapp.datasource.local.entities.PokemonAbility
+import com.np.pokemonapp.datasource.local.entities.PokemonWithAbilities
 import com.np.pokemonapp.datasource.network.PokeAPI
 import com.np.pokemonapp.datasource.network.response.Pokemon
 import com.np.pokemonapp.datasource.network.response.PokemonResponse
+import com.np.pokemonapp.domain.mapper.DaoModelToDomainModel
+import com.np.pokemonapp.domain.mapper.PokeResponseToDaoModel
+import com.np.pokemonapp.domain.model.PokemonDomainModel
 import com.np.pokemonapp.util.Constants.LIMIT
 import com.np.pokemonapp.util.Constants.OFFSET
 import com.np.pokemonapp.util.Resource
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class PokemonRepository @Inject constructor(
@@ -19,11 +21,15 @@ class PokemonRepository @Inject constructor(
 ) {
 
     suspend fun getPokemonList(): Resource<PokemonResponse> {
+        pokemonDao.deleteAll()
         val response = try {
             api.getPokemonList(LIMIT, OFFSET)
         } catch (e: Exception) {
             return Resource.Error("An unknown error occurred.")
         }
+
+        val list = PokeResponseToDaoModel.fromResponseList(response)
+        list.map { pokemonDao.insertPokemon(it)}
         return Resource.Success(response)
     }
 
@@ -33,6 +39,18 @@ class PokemonRepository @Inject constructor(
         } catch (e: Exception) {
             return Resource.Error("An unknown error occurred.")
         }
+
+        val list = PokeResponseToDaoModel.fromSinglePokemonResponse(response)
+        list.map { pokemonDao.insertPokemonAbility(it) }
+
         return Resource.Success(response)
+    }
+
+    suspend fun getPokemonWithAbilities(id: Int): PokemonWithAbilities{
+        return pokemonDao.getPokemonWithAbilities(id)
+    }
+
+    suspend fun allPokemonEntriesFromDB(): List<PokemonDomainModel> {
+       return DaoModelToDomainModel.fromDatabaseList(pokemonDao.observeAllPokemonEntries())
     }
 }

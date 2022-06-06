@@ -6,15 +6,16 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.np.pokemonapp.R
 import com.np.pokemonapp.datasource.local.entities.PokemonEntry
+import com.np.pokemonapp.domain.model.PokemonDomainModel
 import kotlinx.android.synthetic.main.pokemon_item.view.*
 import javax.inject.Inject
 
 class PokemonAdapter @Inject constructor(): RecyclerView.Adapter<PokemonAdapter.ImageViewHolder>() {
     class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
-    private var listData = mutableListOf<PokemonEntry>()
+    private var listData = mutableListOf<PokemonDomainModel>()
 
-    fun updateList(pokemonList: List<PokemonEntry>) {
+    fun updateList(pokemonList: List<PokemonDomainModel>) {
         this.listData.clear()
         this.listData.addAll(pokemonList)
         notifyDataSetChanged()
@@ -37,9 +38,10 @@ class PokemonAdapter @Inject constructor(): RecyclerView.Adapter<PokemonAdapter.
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        val pokename = listData[position].pokemonName
+        val pokename = listData[position].name
+        val pokeId = listData[position].id
         holder.itemView.apply {
-            pokemon_name_textview.text = pokename
+            pokemon_name_textview.text = pokename + pokeId
 
             setOnClickListener {
                 onItemClickListener?.let { click ->
