@@ -5,13 +5,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.np.pokemonapp.R
-import com.np.pokemonapp.datasource.local.entities.PokemonEntry
 import com.np.pokemonapp.domain.model.PokemonDomainModel
 import kotlinx.android.synthetic.main.pokemon_item.view.*
 import javax.inject.Inject
 
-class PokemonAdapter @Inject constructor(): RecyclerView.Adapter<PokemonAdapter.ImageViewHolder>() {
-    class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+class PokemonAdapter @Inject constructor(): RecyclerView.Adapter<PokemonAdapter.PokemonViewHolder>() {
+    class PokemonViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
     private var listData = mutableListOf<PokemonDomainModel>()
 
@@ -21,8 +20,8 @@ class PokemonAdapter @Inject constructor(): RecyclerView.Adapter<PokemonAdapter.
         notifyDataSetChanged()
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
-        return ImageViewHolder(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PokemonViewHolder {
+        return PokemonViewHolder(
             LayoutInflater.from(parent.context).inflate(
                 R.layout.pokemon_item,
                 parent,
@@ -37,15 +36,14 @@ class PokemonAdapter @Inject constructor(): RecyclerView.Adapter<PokemonAdapter.
         onItemClickListener = listener
     }
 
-    override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: PokemonViewHolder, position: Int) {
         val pokename = listData[position].name
-        val pokeId = listData[position].id
         holder.itemView.apply {
-            pokemon_name_textview.text = pokename + pokeId
+            pokemon_name_textview.text = pokename
 
             setOnClickListener {
                 onItemClickListener?.let { click ->
-                    click(pokename)
+                    click(pokename.lowercase())
                 }
             }
         }

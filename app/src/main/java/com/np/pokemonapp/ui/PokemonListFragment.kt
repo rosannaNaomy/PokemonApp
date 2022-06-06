@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class PokemonListFragment @Inject constructor(
-    val pokemonAdapter: PokemonAdapter
+    private val pokemonAdapter: PokemonAdapter
 ) : Fragment(R.layout.fragment_pokemon_list) {
 
     private lateinit var viewModel: PokemonSharedViewModel
@@ -27,6 +27,7 @@ class PokemonListFragment @Inject constructor(
         subscribeToObservers()
 
         pokemonAdapter.setOnItemClickListener {
+            viewModel.fetchSinglePokemon(it)
             findNavController().navigate(
                 PokemonListFragmentDirections.actionPokemonListFragmentToPokemonDetailsFragment()
             )
@@ -37,7 +38,6 @@ class PokemonListFragment @Inject constructor(
         viewModel.pokemonList.observe(viewLifecycleOwner) {
             pokemonAdapter.updateList(it)
         }
-        viewModel.fetchSinglePokemon()
     }
 
     private fun setupRecyclerView() {
