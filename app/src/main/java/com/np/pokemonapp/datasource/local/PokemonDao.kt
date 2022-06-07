@@ -18,6 +18,12 @@ interface PokemonDao {
     @Query("SELECT * FROM pokemon_entries")
     fun observeAllPokemonEntries(): LiveData<List<PokemonEntry>>
 
+    @Query("SELECT * FROM pokemon_entries")
+    suspend fun retrieveAllPokemonEntries(): List<PokemonEntry>
+
+    @Query("SELECT * FROM pokemon_abilities where pokeId = :id")
+    suspend fun getAbilities(id:Int): List<PokemonAbility>
+
     @Query("DELETE FROM pokemon_entries")
     suspend fun deleteAll()
 

@@ -3,11 +3,11 @@ package com.np.pokemonapp.ui
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.View
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.np.pokemonapp.R
-import com.np.pokemonapp.ui.adapter.PokemonAdapter
+import com.np.pokemonapp.ui.adapter.PokemonNamesListAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_pokemon_list.*
 import javax.inject.Inject
@@ -15,19 +15,18 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class PokemonListFragment @Inject constructor(
-    private val pokemonAdapter: PokemonAdapter
+    private val pokemonNamesListAdapter: PokemonNamesListAdapter
 ) : Fragment(R.layout.fragment_pokemon_list) {
 
-    private lateinit var viewModel: PokemonSharedViewModel
+    private val viewModel by activityViewModels<PokemonSharedViewModel>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity())[PokemonSharedViewModel::class.java]
         setupRecyclerView()
         subscribeToObservers()
 
-        pokemonAdapter.setOnItemClickListener {
-            viewModel.fetchSinglePokemon(it)
+        pokemonNamesListAdapter.setOnItemClickListener {
+            viewModel.fetchSinglePokemonFromDB(it)
             findNavController().navigate(
                 PokemonListFragmentDirections.actionPokemonListFragmentToPokemonDetailsFragment()
             )
@@ -36,13 +35,13 @@ class PokemonListFragment @Inject constructor(
 
     private fun subscribeToObservers() {
         viewModel.pokemonList.observe(viewLifecycleOwner) {
-            pokemonAdapter.updateList(it)
+            pokemonNamesListAdapter.updateList(it)
         }
     }
 
     private fun setupRecyclerView() {
         recycler_pokemon_list.apply {
-            adapter = pokemonAdapter
+            adapter = pokemonNamesListAdapter
             layoutManager = LinearLayoutManager(requireContext())
         }
     }

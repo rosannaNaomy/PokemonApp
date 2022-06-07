@@ -9,10 +9,10 @@ import com.np.pokemonapp.domain.model.PokemonDomainModel
 import kotlinx.android.synthetic.main.pokemon_item.view.*
 import javax.inject.Inject
 
-class PokemonAdapter @Inject constructor(): RecyclerView.Adapter<PokemonAdapter.PokemonViewHolder>() {
+class PokemonNamesListAdapter @Inject constructor(): RecyclerView.Adapter<PokemonNamesListAdapter.PokemonViewHolder>() {
     class PokemonViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
-    private var listData = mutableListOf<PokemonDomainModel>()
+    private val listData = mutableListOf<PokemonDomainModel>()
 
     fun updateList(pokemonList: List<PokemonDomainModel>) {
         this.listData.clear()
@@ -30,20 +30,21 @@ class PokemonAdapter @Inject constructor(): RecyclerView.Adapter<PokemonAdapter.
         )
     }
 
-    private var onItemClickListener: ((String) -> Unit)? = null
+    private var onItemClickListener: ((Int) -> Unit)? = null
 
-    fun setOnItemClickListener(listener: (String) -> Unit) {
+    fun setOnItemClickListener(listener: (Int) -> Unit) {
         onItemClickListener = listener
     }
 
     override fun onBindViewHolder(holder: PokemonViewHolder, position: Int) {
         val pokename = listData[position].name
+        val pokeId = listData[position].id
         holder.itemView.apply {
             pokemon_name_textview.text = pokename
 
             setOnClickListener {
                 onItemClickListener?.let { click ->
-                    click(pokename.lowercase())
+                    click(pokeId)
                 }
             }
         }

@@ -45,16 +45,11 @@ class PokemonDaoTest {
         database.close()
     }
 
-    @Test//use run blocking, optimized by skipping delay time
+    @Test
     fun insertPokemon() = runBlockingTest {
         val pokemonEntry = PokemonEntry(1,"name","url")
         dao.insertPokemon(pokemonEntry)
 
-        /*
-         This function is called on livedata objects,
-         what this does: waits on livedata to return a value
-         if it takes more than 2 seconds, by default throws timeout exception
-         */
         val allPokemons = dao.observeAllPokemonEntries().getOrAwaitValueTest()
 
         assertThat(allPokemons).contains(pokemonEntry)

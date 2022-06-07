@@ -29,11 +29,6 @@ import java.util.concurrent.TimeoutException
  * Use this extension from host-side (JVM) tests. It's recommended to use it alongside
  * `InstantTaskExecutorRule` or a similar mechanism to execute tasks synchronously.
  */
-/*
-    This function is called on livedata objects,
-    what this does: waits on livedata to return a value
-    if it takes more than 2 seconds, by default throws timeout exception
- */
 @VisibleForTesting(otherwise = VisibleForTesting.NONE)
 fun <T> LiveData<T>.getOrAwaitValueTest(
     time: Long = 2,
@@ -54,7 +49,6 @@ fun <T> LiveData<T>.getOrAwaitValueTest(
     try {
         afterObserve.invoke()
 
-        // Don't wait indefinitely if the LiveData is not set.
         if (!latch.await(time, timeUnit)) {
             throw TimeoutException("LiveData value was never set.")
         }

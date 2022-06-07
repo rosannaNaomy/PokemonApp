@@ -1,15 +1,15 @@
 package com.np.pokemonapp.repository
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import com.np.pokemonapp.datasource.local.PokemonDao
 import com.np.pokemonapp.datasource.local.entities.PokemonAbility
-import com.np.pokemonapp.datasource.local.entities.PokemonWithAbilities
+import com.np.pokemonapp.datasource.local.entities.PokemonEntry
 import com.np.pokemonapp.datasource.network.PokeAPI
 import com.np.pokemonapp.datasource.network.response.Pokemon
 import com.np.pokemonapp.datasource.network.response.PokemonResponse
 import com.np.pokemonapp.domain.mapper.DaoModelToDomainModel
 import com.np.pokemonapp.domain.mapper.PokeResponseToDaoModel
+import com.np.pokemonapp.domain.model.PokemonAbilitiesDomainModel
 import com.np.pokemonapp.domain.model.PokemonDomainModel
 import com.np.pokemonapp.util.Constants.LIMIT
 import com.np.pokemonapp.util.Constants.OFFSET
@@ -22,7 +22,6 @@ class PokemonRepository @Inject constructor(
 ) {
 
     suspend fun getPokemonList(): Resource<PokemonResponse> {
-        pokemonDao.deleteAll()
         val response = try {
             api.getPokemonList(LIMIT, OFFSET)
         } catch (e: Exception) {
@@ -34,25 +33,32 @@ class PokemonRepository @Inject constructor(
         return Resource.Success(response)
     }
 
-    suspend fun getPokemonInfo(pokemonName: String): Resource<Pokemon> {
+    suspend fun getPokemonInfo(id: Int): Resource<Pokemon> {
         val response = try {
-            api.getPokemonInfo(pokemonName)
+            api.getPokemonInfo(id)
         } catch (e: Exception) {
             return Resource.Error("An unknown error occurred.")
         }
 
         val list = PokeResponseToDaoModel.fromSinglePokemonResponse(response)
         list.map { pokemonDao.insertPokemonAbility(it) }
-
         return Resource.Success(response)
     }
 
-    suspend fun getPokemonWithAbilities(id: Int): PokemonWithAbilities{
-        return pokemonDao.getPokemonWithAbilities(id)
+    suspend fun getPokemonWithAbilities(id: Int): PokemonAbilitiesDomainModel{
+        return DaoModelToDomainModel.mapToPokeAbilityDomainModel(pokemonDao.getPokemonWithAbilities(id))
     }
 
     fun allPokemonEntriesFromDB(): LiveData<List<PokemonDomainModel>> {
        return DaoModelToDomainModel.fromDatabaseList(pokemonDao.observeAllPokemonEntries())
+    }
+
+    suspend fun checkDBForAbilitiesId(id:Int): List<PokemonAbility>{
+        return pokemonDao.getAbilities(id)
+    }
+
+    suspend fun retrieveAllPokemonEntries(): List<PokemonEntry>{
+        return pokemonDao.retrieveAllPokemonEntries()
     }
 
 }

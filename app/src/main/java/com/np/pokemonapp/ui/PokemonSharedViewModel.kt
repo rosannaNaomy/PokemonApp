@@ -1,12 +1,10 @@
 package com.np.pokemonapp.ui
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.np.pokemonapp.datasource.local.entities.PokemonWithAbilities
-import com.np.pokemonapp.domain.model.PokemonDomainModel
+import com.np.pokemonapp.domain.model.PokemonAbilitiesDomainModel
 import com.np.pokemonapp.repository.PokemonRepository
 import com.np.pokemonapp.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,9 +16,9 @@ class PokemonSharedViewModel @Inject constructor(
     private val repository: PokemonRepository
 ) : ViewModel() {
 
-    private val _pokemonWithAbilitiesList = MutableLiveData<PokemonWithAbilities>()
-    val pokemonWithAbilitiesList: LiveData<PokemonWithAbilities>
-        get() = _pokemonWithAbilitiesList
+    private val _pokemonWithAbilities = MutableLiveData<PokemonAbilitiesDomainModel>()
+    val pokemonWithAbilities: LiveData<PokemonAbilitiesDomainModel>
+        get() = _pokemonWithAbilities
 
     val pokemonList = repository.allPokemonEntriesFromDB()
 
@@ -28,44 +26,64 @@ class PokemonSharedViewModel @Inject constructor(
     val isLoading = MutableLiveData(false)
 
     init {
-        fetchAllPokemon()
+        fetchAllPokemonFromDB()
     }
 
-    private fun fetchAllPokemon() {
+    private fun fetchAllPokemonFromDB() {
         viewModelScope.launch {
             isLoading.value = true
-            val result = repository.getPokemonList()
-            when (result) {
-                is Resource.Success -> {
-                    loadError.value = ""
-                    isLoading.value = false
-                }
-                is Resource.Error -> {
-                    loadError.value = result.message!!
-                    isLoading.value = false
-                }
+            val pokemonInDB = repository.retrieveAllPokemonEntries()
+            if (pokemonInDB.isNotEmpty()) {
+                isLoading.value = false
+            } else {
+                fetchAllPokemonFromNetwork()
             }
         }
     }
 
-    fun fetchSinglePokemon(name:String) {
+    private suspend fun fetchAllPokemonFromNetwork() {
+        val result = repository.getPokemonList()
+        when (result) {
+            is Resource.Success -> {
+                loadError.value = ""
+                isLoading.value = false
+            }
+            is Resource.Error -> {
+                loadError.value = result.message!!
+                isLoading.value = false
+            }
+        }
+
+    }
+
+    fun fetchSinglePokemonFromDB(id: Int) {
         viewModelScope.launch {
             isLoading.value = true
-            val result = repository.getPokemonInfo(name)
-            when (result) {
-                is Resource.Success -> {
-                    val id = result.data?.id
-                    _pokemonWithAbilitiesList.value = id?.let {
-                        repository.getPokemonWithAbilities(it)
-                    }
+            val abilities = repository.checkDBForAbilitiesId(id)
 
-                    loadError.value = ""
-                    isLoading.value = false
+            if (abilities.isNotEmpty()) {
+                _pokemonWithAbilities.value = repository.getPokemonWithAbilities(id)
+                isLoading.value = false
+            } else {
+                fetchSinglePokemonFromNetwork(id)
+            }
+        }
+    }
+
+    private suspend fun fetchSinglePokemonFromNetwork(id: Int) {
+        val result = repository.getPokemonInfo(id)
+        when (result) {
+            is Resource.Success -> {
+                val res = result.data?.id
+                _pokemonWithAbilities.value = res?.let {
+                    repository.getPokemonWithAbilities(it)
                 }
-                is Resource.Error -> {
-                    loadError.value = result.message!!
-                    isLoading.value = false
-                }
+                loadError.value = ""
+                isLoading.value = false
+            }
+            is Resource.Error -> {
+                loadError.value = result.message!!
+                isLoading.value = false
             }
         }
     }

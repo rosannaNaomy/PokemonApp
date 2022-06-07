@@ -28,7 +28,7 @@ inline fun <reified T : Fragment> launchFragmentInHiltContainer(
     ActivityScenario.launch<HiltTestActivity>(mainActivityIntent).onActivity { activity ->
         fragmentFactory?.let {
             activity.supportFragmentManager.fragmentFactory = it
-        }//make sure not equal to null and set supportfragmentmanager to it
+        }
         val fragment = activity.supportFragmentManager.fragmentFactory.instantiate(
             Preconditions.checkNotNull(T::class.java.classLoader),
             T::class.java.name

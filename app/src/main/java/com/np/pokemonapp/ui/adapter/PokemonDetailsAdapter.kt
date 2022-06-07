@@ -13,9 +13,9 @@ import javax.inject.Inject
 class PokemonDetailsAdapter @Inject constructor(): RecyclerView.Adapter<PokemonDetailsAdapter.PokemonDetailsViewHolder>() {
     class PokemonDetailsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
-    private var listData = mutableListOf<PokemonAbility>()
+    private val listData = mutableListOf<String>()
 
-    fun updateList(pokemonAbilityList: List<PokemonAbility>) {
+    fun updateList(pokemonAbilityList: List<String>) {
         this.listData.clear()
         this.listData.addAll(pokemonAbilityList)
         notifyDataSetChanged()
@@ -32,7 +32,7 @@ class PokemonDetailsAdapter @Inject constructor(): RecyclerView.Adapter<PokemonD
     }
 
     override fun onBindViewHolder(holder: PokemonDetailsViewHolder, position: Int) {
-        val abilityname = listData[position].abilityName
+        val abilityname = listData[position]
         holder.itemView.apply {
             ability_name_textview.text = abilityname
         }

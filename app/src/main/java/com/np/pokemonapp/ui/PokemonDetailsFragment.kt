@@ -2,13 +2,11 @@ package com.np.pokemonapp.ui
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import com.np.pokemonapp.R
-import com.np.pokemonapp.datasource.local.entities.PokemonWithAbilities
+import com.np.pokemonapp.domain.model.PokemonAbilitiesDomainModel
 import com.np.pokemonapp.ui.adapter.PokemonDetailsAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_pokemon_details.*
@@ -19,11 +17,13 @@ class PokemonDetailsFragment @Inject constructor(
     private val pokemonDetailsAdapter: PokemonDetailsAdapter
 ) : Fragment(R.layout.fragment_pokemon_details) {
 
-    private lateinit var viewModel: PokemonSharedViewModel
+    //    private lateinit var viewModel: PokemonSharedViewModel
+    private val viewModel by activityViewModels<PokemonSharedViewModel>()
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity())[PokemonSharedViewModel::class.java]
+//        viewModel = ViewModelProvider(requireActivity())[PokemonSharedViewModel::class.java]
 
         setupRecyclerView()
         subscribeToObservers()
@@ -31,14 +31,14 @@ class PokemonDetailsFragment @Inject constructor(
     }
 
     private fun subscribeToObservers() {
-        viewModel.pokemonWithAbilitiesList.observe(viewLifecycleOwner){
-            pokemonDetailsAdapter.updateList(it.pokemonAbilities)
+        viewModel.pokemonWithAbilities.observe(viewLifecycleOwner) {
+            pokemonDetailsAdapter.updateList(it.abilities)
             setUpHeader(it)
         }
     }
 
-    private fun setUpHeader(pokemonWithAbilities: PokemonWithAbilities){
-        pokemon_name_details_screen_tv.text = pokemonWithAbilities.pokemon.pokemonName
+    private fun setUpHeader(pokemonAbilitiesDomainModel: PokemonAbilitiesDomainModel) {
+        pokemon_name_details_screen_tv.text = pokemonAbilitiesDomainModel.name
     }
 
     private fun setupRecyclerView() {
