@@ -5,7 +5,9 @@ import androidx.test.filters.SmallTest
 import com.google.common.truth.Truth.assertThat
 import com.np.pokemonapp.datasource.local.PokemonDao
 import com.np.pokemonapp.datasource.local.PokemonDatabase
+import com.np.pokemonapp.datasource.local.entities.PokemonAbility
 import com.np.pokemonapp.datasource.local.entities.PokemonEntry
+import com.np.pokemonapp.datasource.local.entities.PokemonWithAbilities
 import com.np.pokemonapp.getOrAwaitValueTest
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -66,5 +68,20 @@ class PokemonDaoTest {
         assertThat(allPokemons).doesNotContain(pokemonEntry)
     }
 
+    @Test
+    fun verifyPokemonWithAbilities() = runBlockingTest {
+        val pokemonEntry = PokemonEntry(1,"Bulbasaur","url")
+        val pokemonAbility = PokemonAbility("overgrow", 1)
+        val pokemonAbility2 = PokemonAbility("chlorophyll", 1)
+
+        dao.insertPokemon(pokemonEntry)
+        dao.insertPokemonAbility(pokemonAbility)
+        dao.insertPokemonAbility(pokemonAbility2)
+
+        val databaseAbilitiesPokemon = dao.getPokemonWithAbilities(1)
+        val listSize = databaseAbilitiesPokemon.pokemonAbilities.size
+
+        assertThat(listSize).isEqualTo(2)
+    }
 
 }

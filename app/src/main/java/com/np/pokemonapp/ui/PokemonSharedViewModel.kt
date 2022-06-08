@@ -5,15 +5,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.np.pokemonapp.domain.model.PokemonAbilitiesDomainModel
-import com.np.pokemonapp.repository.PokemonRepository
+import com.np.pokemonapp.repository.IPokemonRepository
+import com.np.pokemonapp.util.Constants.UNKNOWN_ERROR
 import com.np.pokemonapp.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
 @HiltViewModel
 class PokemonSharedViewModel @Inject constructor(
-    private val repository: PokemonRepository
+    private val repository: IPokemonRepository
 ) : ViewModel() {
 
     private val _pokemonWithAbilities = MutableLiveData<PokemonAbilitiesDomainModel>()
@@ -26,66 +28,55 @@ class PokemonSharedViewModel @Inject constructor(
     val isLoading = MutableLiveData(false)
 
     init {
-        fetchAllPokemonFromDB()
+        fetchAllPokemonFrom()
     }
 
-    private fun fetchAllPokemonFromDB() {
+    fun fetchAllPokemonFrom() {
         viewModelScope.launch {
             isLoading.value = true
-            val pokemonInDB = repository.retrieveAllPokemonEntries()
-            if (pokemonInDB.isNotEmpty()) {
+            if (repository.isDataStored()) {
                 isLoading.value = false
             } else {
-                fetchAllPokemonFromNetwork()
+                val result = repository.getPokemonList()
+                when (result) {
+                    is Resource.Success -> {
+                        loadError.value = ""
+                        isLoading.value = false
+                    }
+                    is Resource.Error -> {
+                        loadError.value = result.message!!
+                        isLoading.value = false
+                    }
+                }
             }
         }
     }
 
-    private suspend fun fetchAllPokemonFromNetwork() {
-        val result = repository.getPokemonList()
-        when (result) {
-            is Resource.Success -> {
-                loadError.value = ""
-                isLoading.value = false
-            }
-            is Resource.Error -> {
-                loadError.value = result.message!!
-                isLoading.value = false
-            }
-        }
-
-    }
-
-    fun fetchSinglePokemonFromDB(id: Int) {
+    fun fetchSinglePokemon(id: Int) {
         viewModelScope.launch {
             isLoading.value = true
-            val abilities = repository.checkDBForAbilitiesId(id)
 
-            if (abilities.isNotEmpty()) {
+            if (repository.isDataStored(id)) {
                 _pokemonWithAbilities.value = repository.getPokemonWithAbilities(id)
                 isLoading.value = false
             } else {
-                fetchSinglePokemonFromNetwork(id)
+                val result = repository.getPokemonInfo(id)
+                when (result) {
+                    is Resource.Success -> {
+                        val res = result.data?.id
+                        _pokemonWithAbilities.value = res?.let { repository.getPokemonWithAbilities(it) }
+
+                        loadError.value = ""
+                        isLoading.value = false
+                    }
+                    is Resource.Error -> {
+                        loadError.value = result.message ?: UNKNOWN_ERROR
+                        isLoading.value = false
+                    }
+                }
             }
         }
     }
 
-    private suspend fun fetchSinglePokemonFromNetwork(id: Int) {
-        val result = repository.getPokemonInfo(id)
-        when (result) {
-            is Resource.Success -> {
-                val res = result.data?.id
-                _pokemonWithAbilities.value = res?.let {
-                    repository.getPokemonWithAbilities(it)
-                }
-                loadError.value = ""
-                isLoading.value = false
-            }
-            is Resource.Error -> {
-                loadError.value = result.message!!
-                isLoading.value = false
-            }
-        }
-    }
 
 }

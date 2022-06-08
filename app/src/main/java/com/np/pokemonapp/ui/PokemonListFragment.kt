@@ -26,7 +26,7 @@ class PokemonListFragment @Inject constructor(
         subscribeToObservers()
 
         pokemonNamesListAdapter.setOnItemClickListener {
-            viewModel.fetchSinglePokemonFromDB(it)
+            viewModel.fetchSinglePokemon(it)
             findNavController().navigate(
                 PokemonListFragmentDirections.actionPokemonListFragmentToPokemonDetailsFragment()
             )

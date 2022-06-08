@@ -19,9 +19,19 @@ import javax.inject.Inject
 class PokemonRepository @Inject constructor(
     private val api: PokeAPI,
     private val pokemonDao: PokemonDao
-) {
+) : IPokemonRepository {
 
-    suspend fun getPokemonList(): Resource<PokemonResponse> {
+    override suspend fun isDataStored(): Boolean {
+        return retrieveAllPokemonEntries().isNotEmpty()
+
+    }
+
+    override suspend fun isDataStored(id:Int): Boolean {
+        return checkDBForAbilitiesId(id).isNotEmpty()
+
+    }
+
+    override suspend fun getPokemonList(): Resource<PokemonResponse> {
         val response = try {
             api.getPokemonList(LIMIT, OFFSET)
         } catch (e: Exception) {
@@ -29,11 +39,11 @@ class PokemonRepository @Inject constructor(
         }
 
         val list = PokeResponseToDaoModel.fromResponseList(response)
-        list.map { pokemonDao.insertPokemon(it)}
+        list.map { pokemonDao.insertPokemon(it) }
         return Resource.Success(response)
     }
 
-    suspend fun getPokemonInfo(id: Int): Resource<Pokemon> {
+    override suspend fun getPokemonInfo(id: Int): Resource<Pokemon> {
         val response = try {
             api.getPokemonInfo(id)
         } catch (e: Exception) {
@@ -45,19 +55,23 @@ class PokemonRepository @Inject constructor(
         return Resource.Success(response)
     }
 
-    suspend fun getPokemonWithAbilities(id: Int): PokemonAbilitiesDomainModel{
-        return DaoModelToDomainModel.mapToPokeAbilityDomainModel(pokemonDao.getPokemonWithAbilities(id))
+    override suspend fun getPokemonWithAbilities(id: Int): PokemonAbilitiesDomainModel {
+        return DaoModelToDomainModel.mapToPokeAbilityDomainModel(
+            pokemonDao.getPokemonWithAbilities(
+                id
+            )
+        )
     }
 
-    fun allPokemonEntriesFromDB(): LiveData<List<PokemonDomainModel>> {
-       return DaoModelToDomainModel.fromDatabaseList(pokemonDao.observeAllPokemonEntries())
+    override fun allPokemonEntriesFromDB(): LiveData<List<PokemonDomainModel>> {
+        return DaoModelToDomainModel.fromDatabaseList(pokemonDao.observeAllPokemonEntries())
     }
 
-    suspend fun checkDBForAbilitiesId(id:Int): List<PokemonAbility>{
+    override suspend fun checkDBForAbilitiesId(id: Int): List<PokemonAbility> {
         return pokemonDao.getAbilities(id)
     }
 
-    suspend fun retrieveAllPokemonEntries(): List<PokemonEntry>{
+    override suspend fun retrieveAllPokemonEntries(): List<PokemonEntry> {
         return pokemonDao.retrieveAllPokemonEntries()
     }
 

@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.np.pokemonapp.datasource.local.PokemonDao
 import com.np.pokemonapp.datasource.local.PokemonDatabase
 import com.np.pokemonapp.datasource.network.PokeAPI
+import com.np.pokemonapp.repository.IPokemonRepository
 import com.np.pokemonapp.repository.PokemonRepository
 import com.np.pokemonapp.util.Constants.BASE_URL
 import com.np.pokemonapp.util.Constants.DATABASE_NAME
@@ -40,7 +41,7 @@ object AppModule {
     fun providePokemonRepository(
         api: PokeAPI,
         dao: PokemonDao
-    ) = PokemonRepository(api, dao)
+    ) = PokemonRepository(api, dao) as IPokemonRepository
 
     @Singleton
     @Provides

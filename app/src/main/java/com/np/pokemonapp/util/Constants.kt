@@ -5,4 +5,6 @@ object Constants {
     const val BASE_URL = "https://pokeapi.co/api/v2/"
     const val LIMIT = 10000
     const val OFFSET = 0
+    const val UNKNOWN_ERROR = "Unknown Error"
+
 }
